@@ -19,7 +19,7 @@ class DQNAgent:
         self.memory = deque(maxlen = memsize)
         self.gamma = ga    # discount rate
         self.epsilon = explore_rate  # exploration rate
-        self.epsilon_min = 0.3
+        self.epsilon_min = 0.45
         self.epsilon_decay = explore_decay
         self.target_model = Sequential()
         self.engine_model = Sequential()
@@ -49,8 +49,16 @@ class DQNAgent:
         xs = []
         ys = []
 
-        xs = minibatch[:][0]
-        ys = reward/10 +np.multiply(self.gamma, self.model.predict(minibatch[:][3]))
+        for state, action, reward, next_state, done in minibatch:
+            target = reward
+
+            if not done:
+                target = reward + np.multiply (self.gamma , self.model.predict(next_state)[0] )
+            else:
+                target = np.multiply (self.gamma , self.model.predict(next_state)[0] )
+                
+            xs.append(state[0])
+            ys.append(target)
         xs = np.array(xs)
         ys = np.array(ys)
         self.model.fit(xs, ys, epochs= 1, verbose=0 , batch_size=batch_size)
@@ -69,6 +77,3 @@ class DQNAgent:
     def learn (self):
         xs = self.memory[:][0]
         ys = self.memory[:][3]
-        self.engine_model.predict(
-        xs = np.array(xs)
-        ys = np.array(ys)
